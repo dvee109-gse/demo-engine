@@ -1,0 +1,26 @@
+{
+  "name": "demo-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TurboMock/DemoDrop-style middleware: scrapes a prospect's site, primes a shared GHL Conversation AI bot with it, builds a branded demo page, and webhooks the link back to GHL.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "scrape:test": "node src/scraper.js",
+    "setup:fields": "node scripts/setupCustomFields.js",
+    "setup:kb": "node scripts/setupKnowledgeBase.js",
+    "setup:agent": "node scripts/setupAgent.js",
+    "list:pipelines": "node scripts/listPipelines.js",
+    "seed:lead": "node scripts/seedTestLead.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.65.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "playwright": "^1.47.0"
+  }
+}

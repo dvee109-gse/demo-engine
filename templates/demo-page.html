@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{businessName}} — AI Demo</title>
+<style>
+  :root { --accent: {{primaryColor}}; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+    background: #f5f5f4;
+    color: #1a1a1a;
+  }
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+  header img { max-height: 48px; margin-bottom: 0.75rem; }
+  header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
+  header p { margin: 0; opacity: 0.9; max-width: 40rem; margin-inline: auto; }
+  main { max-width: 640px; margin: -1.5rem auto 3rem; padding: 0 1.5rem; }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 1.75rem;
+    margin-top: 1.5rem;
+  }
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+  button, a.btn {
+    font: inherit;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.4rem;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    flex: 1;
+    min-width: 10rem;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: #eee; color: #1a1a1a; }
+  #chat-mount { margin-top: 1rem; }
+  .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
+</style>
+</head>
+<body>
+  <header>
+    {{#if logoUrl}}<img src="{{logoUrl}}" alt="{{businessName}} logo" />{{/if}}
+    <h1>Meet {{businessName}}'s new AI employee</h1>
+    <p>{{heroText}}</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Try it like a customer would</h2>
+      <p>Chat or call it below — it's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would.</p>
+      <div class="actions">
+        <button id="start-chat" class="btn-primary">Chat with it</button>
+        <a class="btn btn-secondary" href="tel:{{voiceNumber}}">Call {{voiceNumber}}</a>
+      </div>
+      <div id="chat-mount"></div>
+      <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
+    </div>
+  </main>
+
+  <!-- GHL chat widget embed (paste the snippet from Sites > Chat Widget for the shared demo bot) -->
+  {{chatWidgetEmbed}}
+
+  <script>
+    // Tracking beacon: fires once, on first real interaction, back to the GHL
+    // inbound-webhook workflow that moves the pipeline to "AI Mockup Opened".
+    // Swap the click listener below for the GHL widget's own open/message event
+    // once you've confirmed its JS event name — this button-click is a placeholder
+    // trigger, not a hook into the widget itself.
+    const BEACON_URL = "{{beaconUrl}}";
+    let fired = false;
+    function fireBeacon() {
+      if (fired || !BEACON_URL) return;
+      fired = true;
+      fetch(BEACON_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactId: "{{contactId}}", event: "demo_engaged" }),
+      }).catch(() => {});
+    }
+    document.getElementById("start-chat").addEventListener("click", fireBeacon);
+  </script>
+</body>
+</html>
