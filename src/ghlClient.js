@@ -134,12 +134,20 @@ export async function primeAgent({ businessName, heroText }) {
   });
 }
 
-/** Plain webhook POST — this one needs no guessing, it's just the URL your GHL workflow gave you. */
-export async function notifyDemoReady({ contactId, demoLink, businessName }) {
+/** Plain webhook POST — this one needs no guessing, it's just the URL your GHL workflow gave you.
+ *
+ * Confirmed live (2026-08-08): GHL's Inbound Webhook trigger does NOT use an
+ * arbitrary `contactId` field to attach the run to an existing contact — with
+ * no recognized standard field (email/phone) in the payload, it silently
+ * created a brand-new blank contact and ran the workflow against that
+ * instead, so the real contact's Demo Link field never updated. Including
+ * `email` (a field GHL recognizes for contact matching) fixes this — verify
+ * this actually resolves it before relying on it for other payloads. */
+export async function notifyDemoReady({ contactId, demoLink, businessName, email }) {
   const res = await fetch(config.ghl.demoReadyWebhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contactId, demo_link: demoLink, business_name: businessName }),
+    body: JSON.stringify({ contactId, demo_link: demoLink, business_name: businessName, email }),
   });
   if (!res.ok) {
     throw new Error(`Callback to GHL failed: ${res.status} ${await res.text().catch(() => "")}`);
@@ -147,8 +155,10 @@ export async function notifyDemoReady({ contactId, demoLink, businessName }) {
 }
 
 /** Fired instead of notifyDemoReady() when qualityGate.js flags the scrape (e.g. a parked/dead
- * domain) — routes the opportunity to manual review instead of auto-sending a broken demo. */
-export async function notifyNeedsReview({ contactId, businessName, reasons }) {
+ * domain) — routes the opportunity to manual review instead of auto-sending a broken demo.
+ * Same contact-matching caveat as notifyDemoReady() above — include email so GHL attaches
+ * this to the real contact rather than creating a blank one. */
+export async function notifyNeedsReview({ contactId, businessName, reasons, email }) {
   if (!config.ghl.needsReviewWebhookUrl) {
     console.warn(
       `[ghlClient] GHL_NEEDS_REVIEW_WEBHOOK_URL not set — not notified. Contact ${contactId} (${businessName}) needs manual review: ${reasons.join(" ")}`
@@ -158,7 +168,7 @@ export async function notifyNeedsReview({ contactId, businessName, reasons }) {
   const res = await fetch(config.ghl.needsReviewWebhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contactId, business_name: businessName, reasons: reasons.join(" ") }),
+    body: JSON.stringify({ contactId, business_name: businessName, reasons: reasons.join(" "), email }),
   });
   if (!res.ok) {
     throw new Error(`Needs-review callback to GHL failed: ${res.status} ${await res.text().catch(() => "")}`);

@@ -44,7 +44,7 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
   const quality = assessScrapeQuality(scrape);
   if (!quality.ok) {
     console.warn(`[pipeline] ${contactId}: quality gate failed — ${quality.reasons.join(" ")}`);
-    await notifyNeedsReview({ contactId, businessName: scrape.businessName, reasons: quality.reasons });
+    await notifyNeedsReview({ contactId, businessName: scrape.businessName, reasons: quality.reasons, email });
     return;
   }
 
@@ -67,7 +67,7 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
   const demoLink = await buildDemoPage({ contactId, variables: content.variables, beaconUrl });
 
   console.log(`[pipeline] ${contactId}: notifying GHL — ${demoLink}`);
-  await notifyDemoReady({ contactId, demoLink, businessName: content.variables.businessName });
+  await notifyDemoReady({ contactId, demoLink, businessName: content.variables.businessName, email });
 
   console.log(`[pipeline] ${contactId}: done`);
 }
