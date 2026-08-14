@@ -89,6 +89,21 @@ export async function createContact({ firstName, lastName, email, phone, busines
   });
 }
 
+export async function getContact(contactId) {
+  return ghlAdminRequest(`/contacts/${contactId}`);
+}
+
+/** Confirmed live (2026-08-08): PUT /contacts/{id} with customFields: [{id, value}] —
+ * same shape createContact() already uses. Used here to persist the demo page's
+ * render data (see server.js) so a page can be rebuilt on every request instead
+ * of relying on Render's ephemeral disk. */
+export async function updateContactCustomField(contactId, fieldId, value) {
+  return ghlAdminRequest(`/contacts/${contactId}`, {
+    method: "PUT",
+    body: { customFields: [{ id: fieldId, value }] },
+  });
+}
+
 export async function createOpportunity({ pipelineId, stageId, contactId, name }) {
   return ghlAdminRequest("/opportunities/", {
     method: "POST",

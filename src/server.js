@@ -1,22 +1,61 @@
 import express from "express";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 import { scrapeSite } from "./scraper.js";
 import { buildKnowledgeContent } from "./contentBuilder.js";
 import { extractWithLLM } from "./llmExtractor.js";
 import { primeKnowledgeBase, primeAgent, notifyDemoReady, notifyNeedsReview } from "./ghlClient.js";
-import { buildDemoPage } from "./demoPageBuilder.js";
+import { getContact, updateContactCustomField } from "./ghlAdmin.js";
+import { renderDemoPage, getDemoUrl } from "./demoPageBuilder.js";
 import { markPrimed, getPrimed } from "./store.js";
 import { assessScrapeQuality } from "./qualityGate.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ ok: true, primed: getPrimed() }));
 
-app.use("/demos", express.static(path.join(__dirname, "..", "public", "demos")));
+// Renders the demo page fresh on every request — see demoPageBuilder.js for why
+// this isn't a static file. The render data was persisted to GHL (durable) at
+// pipeline time via saveDemoPageData() below.
+app.get("/demos/:contactId", async (req, res) => {
+  const { contactId } = req.params;
+  try {
+    const contact = await getContact(contactId);
+    const raw = findCustomFieldValue(contact, config.ghl.fieldIds.servicesSummary);
+    if (!raw) {
+      return res.status(404).send("Demo not found for this contact.");
+    }
+    const variables = JSON.parse(raw);
+    const beaconUrl = `${config.demoBaseUrl}/beacon`;
+    const html = await renderDemoPage(variables, { contactId, beaconUrl });
+    res.set("Content-Type", "text/html").send(html);
+  } catch (err) {
+    console.error(`[server] failed to render demo for ${contactId}:`, err.message);
+    res.status(500).send("Could not load this demo right now.");
+  }
+});
+
+// GET /contacts/{id}'s customFields shape wasn't fully confirmed against a live
+// response for this build — handle a couple of plausible shapes rather than
+// assuming one. Adjust if this misses on your account.
+function findCustomFieldValue(contactResponse, fieldId) {
+  const contact = contactResponse?.contact || contactResponse;
+  const fields = contact?.customFields || contact?.customField || [];
+  const match = fields.find((f) => f.id === fieldId);
+  return match?.value ?? match?.fieldValue ?? null;
+}
+
+/** Persists the render data GET /demos/:contactId needs, into GHL (durable) instead
+ * of local disk (wiped on every restart — see demoPageBuilder.js). */
+async function saveDemoPageData(contactId, variables) {
+  const payload = JSON.stringify({
+    businessName: variables.businessName,
+    logoUrl: variables.logoUrl,
+    primaryColor: variables.primaryColor,
+    heroText: variables.heroText,
+  });
+  await updateContactCustomField(contactId, config.ghl.fieldIds.servicesSummary, payload);
+}
 
 // Fired by the GHL workflow when an opportunity moves to "Send Mockup" (blueprint §3.3).
 app.post("/demo", async (req, res) => {
@@ -62,9 +101,9 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
     heroText: content.variables.heroText,
   });
 
-  console.log(`[pipeline] ${contactId}: building demo page`);
-  const beaconUrl = `${config.demoBaseUrl}/beacon`; // see note below
-  const demoLink = await buildDemoPage({ contactId, variables: content.variables, beaconUrl });
+  console.log(`[pipeline] ${contactId}: saving demo page data`);
+  await saveDemoPageData(contactId, content.variables);
+  const demoLink = getDemoUrl(contactId);
 
   console.log(`[pipeline] ${contactId}: notifying GHL — ${demoLink}`);
   await notifyDemoReady({ contactId, demoLink, businessName: content.variables.businessName, email });

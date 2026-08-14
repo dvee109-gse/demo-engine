@@ -29,6 +29,9 @@ export const config = {
     fieldIds: {
       websiteUrl: process.env.GHL_FIELD_WEBSITE_URL_ID || "",
       businessName: process.env.GHL_FIELD_BUSINESS_NAME_ID || "",
+      // Repurposed to store a small JSON blob (logoUrl/primaryColor/heroText)
+      // so demo pages can be rebuilt on every request — see demoPageBuilder.js.
+      servicesSummary: process.env.GHL_FIELD_SERVICES_SUMMARY_ID || "",
     },
   },
 
