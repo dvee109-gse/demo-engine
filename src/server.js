@@ -3,7 +3,7 @@ import { config } from "./config.js";
 import { scrapeSite } from "./scraper.js";
 import { buildKnowledgeContent } from "./contentBuilder.js";
 import { extractWithLLM } from "./llmExtractor.js";
-import { primeKnowledgeBase, primeAgent, notifyDemoReady, notifyNeedsReview } from "./ghlClient.js";
+import { primeKnowledgeBase, primeAgent, primeVoiceAgent, notifyDemoReady, notifyNeedsReview } from "./ghlClient.js";
 import { getContact, updateContactCustomField } from "./ghlAdmin.js";
 import { renderDemoPage, getDemoUrl } from "./demoPageBuilder.js";
 import { markPrimed, getPrimed } from "./store.js";
@@ -100,6 +100,7 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
     businessName: content.variables.businessName,
     heroText: content.variables.heroText,
   });
+  await primeVoiceAgent({ businessName: content.variables.businessName });
 
   console.log(`[pipeline] ${contactId}: saving demo page data`);
   await saveDemoPageData(contactId, content.variables);

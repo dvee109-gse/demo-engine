@@ -134,6 +134,39 @@ export async function primeAgent({ businessName, heroText }) {
   });
 }
 
+/** Updates the shared Voice AI agent's business-context variables (mirrors primeAgent()
+ * for the chat bot — the two are separate GHL agent objects, so both need repriming).
+ * Confirmed live (2026-08-15): PATCH /voice-ai/agents/{id}?locationId=... is a real
+ * partial update — only the fields sent are changed. Requires Voice AI scopes on the
+ * Private Integration Token (voice-ai-agents.readonly / .write) — a 401/403 here
+ * usually means those scopes are missing. Voice AI agent already has the shared
+ * knowledge base attached via the GHL UI, so this only needs to touch the greeting. */
+export async function primeVoiceAgent({ businessName }) {
+  if (!config.ghl.voiceAgentId) {
+    console.warn("[ghlClient] GHL_VOICE_AGENT_ID not set — skipping Voice AI repriming.");
+    return;
+  }
+  const url = new URL(`${config.ghl.apiBaseUrl}/voice-ai/agents/${config.ghl.voiceAgentId}`);
+  url.searchParams.set("locationId", config.ghl.locationId);
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${config.ghl.pitToken}`,
+      Version: config.ghl.apiVersion,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      businessName,
+      welcomeMessage: `Hi, thanks for calling ${businessName}! How can I help you today?`,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.warn(`[ghlClient] voice agent update failed: ${res.status} ${text}`);
+  }
+}
+
 /** Plain webhook POST — this one needs no guessing, it's just the URL your GHL workflow gave you.
  *
  * Confirmed live (2026-08-08): GHL's Inbound Webhook trigger does NOT use an

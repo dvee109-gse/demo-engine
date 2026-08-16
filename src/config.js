@@ -19,6 +19,7 @@ export const config = {
     kbApiVersion: process.env.GHL_KB_API_VERSION || "v3",
     knowledgeBaseId: required("GHL_KNOWLEDGE_BASE_ID", process.env.GHL_KNOWLEDGE_BASE_ID),
     agentId: required("GHL_AGENT_ID", process.env.GHL_AGENT_ID),
+    voiceAgentId: process.env.GHL_VOICE_AGENT_ID || "",
     chatWidgetEmbed: process.env.GHL_CHAT_WIDGET_EMBED || "",
     voiceNumber: process.env.GHL_VOICE_NUMBER || "",
     demoReadyWebhookUrl: required("GHL_DEMO_READY_WEBHOOK_URL", process.env.GHL_DEMO_READY_WEBHOOK_URL),
