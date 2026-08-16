@@ -58,7 +58,7 @@
   <main>
     <div class="card">
       <h2>Try it like a customer would</h2>
-      <p>Chat or call it below — it's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would.</p>
+      <p>Chat or talk to it below — it's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Prefer an actual phone call instead? Dial {{voiceNumber}}.</p>
       <div class="actions">
         <button id="start-chat" class="btn-primary">Chat with it</button>
         <a class="btn btn-secondary" href="tel:{{voiceNumber}}">Call {{voiceNumber}}</a>
@@ -68,8 +68,13 @@
     </div>
   </main>
 
-  <!-- GHL chat widget embed (paste the snippet from Sites > Chat Widget for the shared demo bot) -->
+  <!-- GHL chat widget embed (paste the snippet from Sites > Chat Widgets for the shared Conversation AI demo bot) -->
   {{chatWidgetEmbed}}
+
+  <!-- GHL Voice AI Chat Widget embed — a separate Sites > Chat Widgets entry
+       (Agent tab -> Voice AI Agent) using WebRTC browser mic, distinct from the
+       text chat widget above. Injects its own floating trigger UI. -->
+  {{voiceWidgetEmbed}}
 
   <script>
     // Tracking beacon: fires once, on first real interaction, back to the GHL

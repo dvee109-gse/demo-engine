@@ -21,6 +21,10 @@ export const config = {
     agentId: required("GHL_AGENT_ID", process.env.GHL_AGENT_ID),
     voiceAgentId: process.env.GHL_VOICE_AGENT_ID || "",
     chatWidgetEmbed: process.env.GHL_CHAT_WIDGET_EMBED || "",
+    // Separate embed from the chat widget — GHL's "Voice AI Chat Widget" is its
+    // own Sites > Chat Widgets entry (Agent tab -> Voice AI Agent), a WebRTC
+    // browser mic widget distinct from the text chat widget above.
+    voiceWidgetEmbed: process.env.GHL_VOICE_WIDGET_EMBED || "",
     voiceNumber: process.env.GHL_VOICE_NUMBER || "",
     demoReadyWebhookUrl: required("GHL_DEMO_READY_WEBHOOK_URL", process.env.GHL_DEMO_READY_WEBHOOK_URL),
     needsReviewWebhookUrl: process.env.GHL_NEEDS_REVIEW_WEBHOOK_URL || "",

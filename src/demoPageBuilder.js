@@ -34,6 +34,7 @@ export async function renderDemoPage(variables, { contactId, beaconUrl }) {
     heroText: variables.heroText,
     voiceNumber: config.ghl.voiceNumber,
     chatWidgetEmbed: config.ghl.chatWidgetEmbed,
+    voiceWidgetEmbed: config.ghl.voiceWidgetEmbed,
     beaconUrl: beaconUrl || "",
     contactId,
   });
