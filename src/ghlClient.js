@@ -140,7 +140,11 @@ export async function primeAgent({ businessName, heroText }) {
  * partial update — only the fields sent are changed. Requires Voice AI scopes on the
  * Private Integration Token (voice-ai-agents.readonly / .write) — a 401/403 here
  * usually means those scopes are missing. Voice AI agent already has the shared
- * knowledge base attached via the GHL UI, so this only needs to touch the greeting. */
+ * knowledge base attached via the GHL UI, so this only needs to touch the greeting.
+ *
+ * The welcome message doubles as the intake question — the agentPrompt (set once,
+ * business-agnostic, see scripts/setupVoiceAgentPrompt.js) tells the agent to use
+ * the caller's answer to it, then transition into roleplaying as the business. */
 export async function primeVoiceAgent({ businessName }) {
   if (!config.ghl.voiceAgentId) {
     console.warn("[ghlClient] GHL_VOICE_AGENT_ID not set — skipping Voice AI repriming.");
@@ -158,7 +162,7 @@ export async function primeVoiceAgent({ businessName }) {
     },
     body: JSON.stringify({
       businessName,
-      welcomeMessage: `Hi, thanks for calling ${businessName}! How can I help you today?`,
+      welcomeMessage: `Hi, thanks for calling ${businessName}! Before we dive in — what's one thing about your business you'd want a caller to know, like a specific service or something that sets you apart?`,
     }),
   });
   if (!res.ok) {
