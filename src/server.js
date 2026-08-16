@@ -59,6 +59,7 @@ async function saveDemoPageData(contactId, variables) {
 
 // Fired by the GHL workflow when an opportunity moves to "Send Mockup" (blueprint §3.3).
 app.post("/demo", async (req, res) => {
+  console.log(`[server] /demo raw body: ${JSON.stringify(req.body)}`);
   const { contactId, businessName, websiteUrl, email, phone } = req.body || {};
 
   if (!contactId || !websiteUrl) {

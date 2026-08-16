@@ -2,12 +2,15 @@ import { createContact, createOpportunity } from "../src/ghlAdmin.js";
 
 // Mirrors the "Steve TM27" test lead from the walkthrough: a real business URL,
 // a fake name, so you can run the whole pipeline end-to-end without emailing an
-// actual prospect. Usage:
-//   node scripts/seedTestLead.js "https://some-real-business.com" "Some Business Name"
+// actual prospect. Pass a 3rd argument with a real email to instead receive the
+// real branded email — for testing the full experience as an actual prospect
+// would see it (fake @example.com addresses can't receive mail — confirmed live).
+// Usage:
+//   node scripts/seedTestLead.js "https://some-real-business.com" "Some Business Name" ["real@email.com"]
 async function main() {
-  const [websiteUrl, businessName] = process.argv.slice(2);
+  const [websiteUrl, businessName, realEmail] = process.argv.slice(2);
   if (!websiteUrl || !businessName) {
-    console.error('Usage: node scripts/seedTestLead.js "<website-url>" "<business-name>"');
+    console.error('Usage: node scripts/seedTestLead.js "<website-url>" "<business-name>" ["<real-email>"]');
     process.exit(1);
   }
 
@@ -25,7 +28,7 @@ async function main() {
   const contact = await createContact({
     firstName: "Test",
     lastName: `Lead-${suffix.slice(-4)}`,
-    email: `test-lead-${Date.now()}@example.com`,
+    email: realEmail || `test-lead-${Date.now()}@example.com`,
     phone: `+1555${suffix}`,
     businessName,
     websiteUrl,
