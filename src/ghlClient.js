@@ -127,6 +127,11 @@ export async function primeAgent({ businessName, heroText }) {
       goal: "Help prospective customers understand what this business offers and encourage them to book a consultation or ask further questions.",
       instructions: `You represent ${businessName}. ${heroText || ""} Answer only using information from your knowledge base. Be concise and accurate — if you don't know something, say so honestly rather than guessing.`,
       mode: "auto-pilot",
+      // Confirmed live (2026-08-16): omitting this on a PUT to the shared
+      // demo bot (which is the location's only/primary agent) 422s with
+      // "Primary agent cannot be updated to non-primary" — GHL treats a
+      // missing isPrimary as false and rejects flipping a primary agent.
+      isPrimary: true,
       knowledgeBaseIds: [config.ghl.knowledgeBaseId],
     },
   }).catch((err) => {
@@ -162,7 +167,9 @@ export async function primeVoiceAgent({ businessName }) {
     },
     body: JSON.stringify({
       businessName,
-      welcomeMessage: `Hi, thanks for calling ${businessName}! Before we dive in — what's one thing about your business you'd want a caller to know, like a specific service or something that sets you apart?`,
+      // GHL caps welcomeMessage at 190 chars (confirmed live, 2026-08-16) —
+      // truncate defensively since real prospect business names vary in length.
+      welcomeMessage: `Hi, thanks for calling ${businessName}! Quick one before we start — what's something about your business you'd want a caller to know?`.slice(0, 190),
     }),
   });
   if (!res.ok) {
