@@ -24,6 +24,18 @@ const REGISTRAR_BRAND_NAMES = ["expireddomains", "godaddy", "afternic", "sedo", 
 
 export function assessScrapeQuality(scrape) {
   const reasons = [];
+
+  // Confirmed live (2026-08-15): Playwright doesn't throw on HTTP error
+  // responses, so a blocked/broken site's error page (e.g. skinneymedspa.com
+  // returning 403) gets scraped as if it were real content — the error page's
+  // own heading ("403 - Forbidden") ended up as the extracted business name.
+  // Ground-truth HTTP status, checked before any text-pattern heuristics.
+  if (scrape.httpStatus && scrape.httpStatus >= 400) {
+    reasons.push(
+      `Site returned HTTP ${scrape.httpStatus} — likely blocked (bot detection), broken, or inaccessible to scraping rather than a real page.`
+    );
+  }
+
   const haystack = `${scrape.heroText} ${scrape.rawTextSample}`.toLowerCase();
 
   const parkingHits = PARKING_MARKETPLACE_TERMS.filter((term) => haystack.includes(term));

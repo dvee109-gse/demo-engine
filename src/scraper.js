@@ -129,7 +129,13 @@ export async function scrapeSite(url, { timeoutMs = 20000 } = {}) {
     const page = await context.newPage();
     page.setDefaultTimeout(timeoutMs);
 
-    await page.goto(url, { waitUntil: "domcontentloaded" });
+    // Playwright does NOT throw on HTTP error responses (403, 404, 500, ...) —
+    // only on network-level failures (DNS, connection refused, etc.). Without
+    // this check, a blocked/broken site's error page gets scraped as if it were
+    // real content — e.g. "403 - Forbidden" ending up as the extracted business
+    // name. Ground-truth signal is the response status, not text pattern matching.
+    const response = await page.goto(url, { waitUntil: "domcontentloaded" });
+    const httpStatus = response?.status() ?? null;
     const home = await extractFromPage(page);
 
     const anchors = await page.evaluate(() =>
@@ -168,6 +174,7 @@ export async function scrapeSite(url, { timeoutMs = 20000 } = {}) {
 
     return {
       sourceUrl: url,
+      httpStatus,
       businessName,
       logoUrl: home.logoUrl,
       primaryColor: home.themeColor || "",
