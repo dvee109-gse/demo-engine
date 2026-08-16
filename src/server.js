@@ -59,8 +59,12 @@ async function saveDemoPageData(contactId, variables) {
 
 // Fired by the GHL workflow when an opportunity moves to "Send Mockup" (blueprint §3.3).
 app.post("/demo", async (req, res) => {
-  console.log(`[server] /demo raw body: ${JSON.stringify(req.body)}`);
-  const { contactId, businessName, websiteUrl, email, phone } = req.body || {};
+  // GHL's Webhook workflow action nests the action's own Custom Data fields
+  // under `customData` alongside a large flat object of standard contact/
+  // opportunity/location fields — confirmed live (2026-08-16) via raw body
+  // logging. Falls back to top-level for direct/manual POSTs (e.g. curl tests).
+  const body = req.body?.customData || req.body || {};
+  const { contactId, businessName, websiteUrl, email, phone } = body;
 
   if (!contactId || !websiteUrl) {
     return res.status(400).json({ error: "contactId and websiteUrl are required" });
