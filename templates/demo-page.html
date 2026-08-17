@@ -30,21 +30,7 @@
     padding: 1.75rem;
     margin-top: 1.5rem;
   }
-  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
-  button, a.btn {
-    font: inherit;
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1.4rem;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    flex: 1;
-    min-width: 10rem;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-secondary { background: #eee; color: #1a1a1a; }
-  #chat-mount { margin-top: 1rem; }
+  .card p a { color: var(--accent); font-weight: 600; }
   .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 </style>
 </head>
@@ -58,12 +44,7 @@
   <main>
     <div class="card">
       <h2>Try it like a customer would</h2>
-      <p>Chat or talk to it below — it's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Prefer an actual phone call instead? Dial {{voiceNumber}}.</p>
-      <div class="actions">
-        <button id="start-chat" class="btn-primary">Chat with it</button>
-        <a class="btn btn-secondary" href="tel:{{voiceNumber}}">Call {{voiceNumber}}</a>
-      </div>
-      <div id="chat-mount"></div>
+      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Use the chat and voice widgets in the corner to try it — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
       <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
     </div>
   </main>
@@ -79,9 +60,12 @@
   <script>
     // Tracking beacon: fires once, on first real interaction, back to the GHL
     // inbound-webhook workflow that moves the pipeline to "AI Mockup Opened".
-    // Swap the click listener below for the GHL widget's own open/message event
-    // once you've confirmed its JS event name — this button-click is a placeholder
-    // trigger, not a hook into the widget itself.
+    // Only wired to the phone link click for now — a real signal of intent.
+    // GHL's chat/voice widgets expose window.leadConnector.chatWidget and an
+    // "LC_chatWidgetLoaded" event, but that fires on page load (script ready),
+    // not on the visitor actually opening/using the widget, so it's not a
+    // usable engagement signal — swap in a real open/message event if GHL
+    // exposes one later.
     const BEACON_URL = "{{beaconUrl}}";
     let fired = false;
     function fireBeacon() {
@@ -93,7 +77,7 @@
         body: JSON.stringify({ contactId: "{{contactId}}", event: "demo_engaged" }),
       }).catch(() => {});
     }
-    document.getElementById("start-chat").addEventListener("click", fireBeacon);
+    document.getElementById("call-link").addEventListener("click", fireBeacon);
   </script>
 </body>
 </html>
