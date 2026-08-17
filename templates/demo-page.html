@@ -31,6 +31,7 @@
     margin-top: 1.5rem;
   }
   .card p a { color: var(--accent); font-weight: 600; }
+  .widgets { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; }
   .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 </style>
 </head>
@@ -44,18 +45,21 @@
   <main>
     <div class="card">
       <h2>Try it like a customer would</h2>
-      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Use the chat and voice widgets in the corner to try it — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
+      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Chat or talk to it right here — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
+      <div class="widgets">
+        <!-- GHL chat widget embed — set Widget Placement to "Embedded/Inline"
+             in Sites > Chat Widgets > Style before copying this snippet, or it
+             renders as a floating bubble instead of inline here. -->
+        {{chatWidgetEmbed}}
+
+        <!-- GHL Voice AI Chat Widget embed — a separate Sites > Chat Widgets
+             entry (Agent tab -> Voice AI Agent), also set to "Embedded/Inline"
+             placement. WebRTC browser mic, distinct from the text widget above. -->
+        {{voiceWidgetEmbed}}
+      </div>
       <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
     </div>
   </main>
-
-  <!-- GHL chat widget embed (paste the snippet from Sites > Chat Widgets for the shared Conversation AI demo bot) -->
-  {{chatWidgetEmbed}}
-
-  <!-- GHL Voice AI Chat Widget embed — a separate Sites > Chat Widgets entry
-       (Agent tab -> Voice AI Agent) using WebRTC browser mic, distinct from the
-       text chat widget above. Injects its own floating trigger UI. -->
-  {{voiceWidgetEmbed}}
 
   <script>
     // Tracking beacon: fires once, on first real interaction, back to the GHL
