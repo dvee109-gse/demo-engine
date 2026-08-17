@@ -10,14 +10,16 @@ const SUBPAGE_KEYWORDS = {
 
 const PHONE_RE = /(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
 
-/** Cleans a raw <title> tag used as a last-resort businessName fallback (when
- * og:site_name and h1 are both missing). SEO titles are commonly "Keyword |
- * Brand" (confirmed live, 2026-08-16: themedilawfirm.com's title is "Medical
- * Lawyers | The Medi-Law Firm") — the brand is more often the last segment
- * after a separator than the first, so prefer that when the title has one. */
-function cleanTitleFallback(title) {
-  const segments = title.split(/\s*[|–—]\s*|\s+-\s+/).filter(Boolean);
-  return segments.length > 1 ? segments[segments.length - 1].trim() : title.trim();
+/** Strips SEO keyword-stuffing from a businessName candidate. Confirmed live
+ * (2026-08-16): themedilawfirm.com's own og:site_name meta tag — not just its
+ * <title>, which would be a lower-priority fallback — is literally "Medical
+ * Lawyers | The Medi-Law Firm", so this must run on whichever signal wins,
+ * not just a last-resort title fallback. SEO strings are commonly "Keyword |
+ * Brand"; the brand is more often the last segment after a separator than
+ * the first, so prefer that when one exists. */
+function cleanSeoName(name) {
+  const segments = name.split(/\s*[|–—]\s*|\s+-\s+/).filter(Boolean);
+  return segments.length > 1 ? segments[segments.length - 1].trim() : name.trim();
 }
 
 /** Pulls the DOM signals we need for a knowledge base + demo page out of one loaded page. */
@@ -171,7 +173,7 @@ export async function scrapeSite(url, { timeoutMs = 20000 } = {}) {
       [home, ...Object.values(pages)].map((p) => p?.bodyText || "").join(" ").match(PHONE_RE)?.[0] ||
       "";
 
-    const businessName = (home.ogSiteName || home.h1 || cleanTitleFallback(home.title || "")).trim();
+    const businessName = cleanSeoName((home.ogSiteName || home.h1 || home.title || "").trim());
 
     const faqPairs = [home, ...Object.values(pages)]
       .flatMap((p) => p?.faqPairs || [])
