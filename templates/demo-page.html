@@ -32,23 +32,7 @@
   }
   .card p a { color: var(--accent); font-weight: 600; }
   .widgets { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; }
-  /* GHL's own Widget Dimension controls only apply to "Sticky" (floating)
-     placement, not "Embedded/Inline" (confirmed live, 2026-08-18: changing
-     them had zero effect on an inline widget) — shrink it ourselves instead.
-     scale() reduces it proportionally (header/messages/input all get smaller)
-     rather than cropping content behind a scrollbar. transform doesn't affect
-     layout box size, so the wrapper's height is capped to match the visual
-     (post-scale) size, with clipping as a safety net for any excess. */
-  .widget-mount {
-    max-height: 340px;
-    overflow: hidden;
-    border-radius: 10px;
-  }
-  .widget-mount > * {
-    transform: scale(0.7);
-    transform-origin: top left;
-    width: 142.86%; /* 100 / 0.7 — so scaled-down width still fills the column */
-  }
+  .widget-mount { border-radius: 10px; }
   .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 </style>
 </head>
@@ -64,15 +48,18 @@
       <h2>Try it like a customer would</h2>
       <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Chat or talk to it right here — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
       <div class="widgets">
-        <!-- GHL chat widget embed — set Widget Placement to "Embedded/Inline"
-             in Sites > Chat Widgets > Style before copying this snippet, or it
-             renders as a floating bubble instead of inline here. -->
-        <div class="widget-mount">{{chatWidgetEmbed}}</div>
-
-        <!-- GHL Voice AI Chat Widget embed — a separate Sites > Chat Widgets
-             entry (Agent tab -> Voice AI Agent), also set to "Embedded/Inline"
-             placement. WebRTC browser mic, distinct from the text widget above. -->
+        <!-- GHL Voice AI Chat Widget embed — the main feature of this demo —
+             a separate Sites > Chat Widgets entry (Agent tab -> Voice AI
+             Agent), set to "Embedded/Inline" placement. WebRTC browser mic,
+             distinct from the text widget below. Ordered first/on top since
+             it's the primary thing prospects should try. -->
         <div class="widget-mount">{{voiceWidgetEmbed}}</div>
+
+        <!-- GHL chat widget embed — secondary to the voice widget above. Set
+             Widget Placement to "Embedded/Inline" in Sites > Chat Widgets >
+             Style before copying this snippet, or it renders as a floating
+             bubble instead of inline here. -->
+        <div class="widget-mount">{{chatWidgetEmbed}}</div>
       </div>
       <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
     </div>
