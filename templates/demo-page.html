@@ -76,13 +76,19 @@
   .phone-screen {
     background: #fff;
     border-radius: 22px;
-    overflow-y: auto;
-    /* Fixed to match the Talk panel's height so both tabs are the same size —
-       the chat widget's own content is taller than this, so it scrolls
-       within this fixed window rather than growing the frame. */
+    overflow: hidden;
+    /* Fixed to match the Talk panel's height so both tabs are the same size. */
     height: 280px;
   }
   .mode-panel[hidden] { display: none; }
+  /* Force the injected chat widget to fill this exact box instead of
+     rendering at its own taller natural size and getting clipped by our
+     outer wrapper's scroll — this should let the widget's own internal
+     layout keep the input pinned at the bottom with only the message list
+     scrolling, like a normal chat UI, instead of the whole widget (header
+     included) scrolling as one long block. */
+  .mode-panel[data-panel="chat"] { height: 100%; }
+  .mode-panel[data-panel="chat"] > * { height: 100% !important; }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
      looked lost/tiny pinned to the top of a tall frame — center it instead.
      The chat widget fills the frame on its own (header/messages/input), so it
