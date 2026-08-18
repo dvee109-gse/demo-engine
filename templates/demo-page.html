@@ -32,6 +32,10 @@
   }
   .card p a { color: var(--accent); font-weight: 600; }
   .widgets { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; }
+  /* GHL's own Widget Dimension controls only apply to "Sticky" (floating)
+     placement, not "Embedded/Inline" (confirmed live, 2026-08-18: changing
+     them had zero effect on an inline widget) — cap the box ourselves instead. */
+  .widget-mount { max-height: 420px; overflow-y: auto; border-radius: 10px; }
   .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 </style>
 </head>
@@ -50,12 +54,12 @@
         <!-- GHL chat widget embed — set Widget Placement to "Embedded/Inline"
              in Sites > Chat Widgets > Style before copying this snippet, or it
              renders as a floating bubble instead of inline here. -->
-        {{chatWidgetEmbed}}
+        <div class="widget-mount">{{chatWidgetEmbed}}</div>
 
         <!-- GHL Voice AI Chat Widget embed — a separate Sites > Chat Widgets
              entry (Agent tab -> Voice AI Agent), also set to "Embedded/Inline"
              placement. WebRTC browser mic, distinct from the text widget above. -->
-        {{voiceWidgetEmbed}}
+        <div class="widget-mount">{{voiceWidgetEmbed}}</div>
       </div>
       <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
     </div>
