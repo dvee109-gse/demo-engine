@@ -77,12 +77,13 @@
     background: #fff;
     border-radius: 22px;
     overflow-y: auto;
-    /* Viewport-relative instead of a fixed px cap — every fixed height tried
-       (480px, 620px, 420px, 280px) either clipped the chat widget's input row
-       or looked wrong, so this only kicks in as a safety net for genuinely
-       tall content instead of guessing another fixed number. User asked to
-       revert back to this after the 420px/280px fixed-height attempts. */
-    max-height: 85vh;
+    /* Fixed and modest so the whole phone frame fits comfortably on the page
+       without needing to scroll the page itself to see it (confirmed live,
+       2026-08-18: earlier fixed heights only looked like they clipped the
+       chat widget's input row because of OUR OWN accumulated test-message
+       history in one browser session — a real prospect's fresh conversation
+       fits fine here without internal scrolling either). */
+    height: 420px;
   }
   .mode-panel[hidden] { display: none; }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
