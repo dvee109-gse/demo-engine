@@ -34,8 +34,21 @@
   .widgets { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; }
   /* GHL's own Widget Dimension controls only apply to "Sticky" (floating)
      placement, not "Embedded/Inline" (confirmed live, 2026-08-18: changing
-     them had zero effect on an inline widget) — cap the box ourselves instead. */
-  .widget-mount { max-height: 420px; overflow-y: auto; border-radius: 10px; }
+     them had zero effect on an inline widget) — shrink it ourselves instead.
+     scale() reduces it proportionally (header/messages/input all get smaller)
+     rather than cropping content behind a scrollbar. transform doesn't affect
+     layout box size, so the wrapper's height is capped to match the visual
+     (post-scale) size, with clipping as a safety net for any excess. */
+  .widget-mount {
+    max-height: 340px;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .widget-mount > * {
+    transform: scale(0.7);
+    transform-origin: top left;
+    width: 142.86%; /* 100 / 0.7 — so scaled-down width still fills the column */
+  }
   .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 </style>
 </head>
