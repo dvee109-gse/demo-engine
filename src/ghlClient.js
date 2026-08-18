@@ -132,6 +132,13 @@ export async function primeAgent({ businessName, heroText }) {
       // "Primary agent cannot be updated to non-primary" — GHL treats a
       // missing isPrimary as false and rejects flipping a primary agent.
       isPrimary: true,
+      // Confirmed live (2026-08-17): omitting this (even with isPrimary:true
+      // present and accepted) silently drops the agent's channel binding —
+      // the embedded chat widget fell back to GHL's plain live-chat "no one
+      // available" flow instead of the bot responding, even though GET showed
+      // mode:auto-pilot and isPrimary:true. Resending it keeps the widget wired
+      // to this agent.
+      channels: ["Live_Chat"],
       knowledgeBaseIds: [config.ghl.knowledgeBaseId],
     },
   }).catch((err) => {
