@@ -29,11 +29,58 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     padding: 1.75rem;
     margin-top: 1.5rem;
+    text-align: center;
   }
+  .card p { text-align: left; }
   .card p a { color: var(--accent); font-weight: 600; }
-  .widgets { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; }
-  .widget-mount { border-radius: 10px; }
-  .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; }
+  .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; text-align: left; }
+
+  /* Phone mockup: one shared frame, tap to switch between the voice and chat
+     widgets instead of showing both GHL panels stacked on the page at once. */
+  .phone {
+    width: min(320px, 100%);
+    margin: 1.5rem auto 0;
+    background: #17181c;
+    border-radius: 34px;
+    padding: 14px 10px 18px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  }
+  .phone-notch {
+    width: 70px;
+    height: 5px;
+    background: #3a3b40;
+    border-radius: 3px;
+    margin: 0 auto 12px;
+  }
+  .mode-toggle {
+    display: flex;
+    gap: 0.3rem;
+    background: #26272d;
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 10px;
+  }
+  .mode-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #9a9ba3;
+    padding: 0.55rem 0.5rem;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .mode-btn.active { background: var(--accent); color: #fff; }
+  .phone-screen {
+    background: #fff;
+    border-radius: 22px;
+    overflow-y: auto;
+    max-height: 480px;
+    min-height: 220px;
+  }
+  .mode-panel[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -46,21 +93,27 @@
   <main>
     <div class="card">
       <h2>Try it like a customer would</h2>
-      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Chat or talk to it right here — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
-      <div class="widgets">
-        <!-- GHL Voice AI Chat Widget embed — the main feature of this demo —
-             a separate Sites > Chat Widgets entry (Agent tab -> Voice AI
-             Agent), set to "Embedded/Inline" placement. WebRTC browser mic,
-             distinct from the text widget below. Ordered first/on top since
-             it's the primary thing prospects should try. -->
-        <div class="widget-mount">{{voiceWidgetEmbed}}</div>
+      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Tap below to talk to it or chat with it — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
 
-        <!-- GHL chat widget embed — secondary to the voice widget above. Set
-             Widget Placement to "Embedded/Inline" in Sites > Chat Widgets >
-             Style before copying this snippet, or it renders as a floating
-             bubble instead of inline here. -->
-        <div class="widget-mount">{{chatWidgetEmbed}}</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="mode-toggle">
+          <button type="button" class="mode-btn active" data-mode="voice">Talk</button>
+          <button type="button" class="mode-btn" data-mode="chat">Chat</button>
+        </div>
+        <div class="phone-screen">
+          <!-- GHL Voice AI Chat Widget embed — the main feature of this demo,
+               shown by default. Separate Sites > Chat Widgets entry (Agent
+               tab -> Voice AI Agent), set to "Embedded/Inline" placement. -->
+          <div class="mode-panel" data-panel="voice">{{voiceWidgetEmbed}}</div>
+
+          <!-- GHL chat widget embed — secondary, hidden until "Chat" is
+               tapped. Also set to "Embedded/Inline" placement, or it renders
+               as a floating bubble instead of inline here. -->
+          <div class="mode-panel" data-panel="chat" hidden>{{chatWidgetEmbed}}</div>
+        </div>
       </div>
+
       <p class="fineprint">This is a live demo built from {{businessName}}'s public website — not a real employee, and no info you enter here is used outside this demo.</p>
     </div>
   </main>
@@ -68,12 +121,12 @@
   <script>
     // Tracking beacon: fires once, on first real interaction, back to the GHL
     // inbound-webhook workflow that moves the pipeline to "AI Mockup Opened".
-    // Only wired to the phone link click for now — a real signal of intent.
-    // GHL's chat/voice widgets expose window.leadConnector.chatWidget and an
-    // "LC_chatWidgetLoaded" event, but that fires on page load (script ready),
-    // not on the visitor actually opening/using the widget, so it's not a
-    // usable engagement signal — swap in a real open/message event if GHL
-    // exposes one later.
+    // Only wired to the phone link click and the mode toggle for now — a real
+    // signal of intent. GHL's chat/voice widgets expose
+    // window.leadConnector.chatWidget and an "LC_chatWidgetLoaded" event, but
+    // that fires on page load (script ready), not on the visitor actually
+    // opening/using the widget, so it's not a usable engagement signal —
+    // swap in a real open/message event if GHL exposes one later.
     const BEACON_URL = "{{beaconUrl}}";
     let fired = false;
     function fireBeacon() {
@@ -86,6 +139,18 @@
       }).catch(() => {});
     }
     document.getElementById("call-link").addEventListener("click", fireBeacon);
+
+    document.querySelectorAll(".mode-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        fireBeacon();
+        document.querySelectorAll(".mode-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const mode = btn.dataset.mode;
+        document.querySelectorAll(".mode-panel").forEach((p) => {
+          p.hidden = p.dataset.panel !== mode;
+        });
+      });
+    });
   </script>
 </body>
 </html>
