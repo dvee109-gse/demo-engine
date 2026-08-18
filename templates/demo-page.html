@@ -77,12 +77,12 @@
     background: #fff;
     border-radius: 22px;
     overflow-y: auto;
-    /* Fixed to match the Talk panel's height so both tabs are the same size —
-       the chat widget's own content is taller than this, so it scrolls
-       within this fixed window rather than growing the frame. Forcing the
-       widget to fill the box via height:100% (tried 2026-08-18) broke its
-       internal layout instead of fixing the input-visibility issue — reverted. */
-    height: 280px;
+    /* Viewport-relative instead of a fixed px cap — every fixed height tried
+       (480px, 620px, 420px, 280px) either clipped the chat widget's input row
+       or looked wrong, so this only kicks in as a safety net for genuinely
+       tall content instead of guessing another fixed number. User asked to
+       revert back to this after the 420px/280px fixed-height attempts. */
+    max-height: 85vh;
   }
   .mode-panel[hidden] { display: none; }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
@@ -93,7 +93,7 @@
      wins on source order, making the "hidden" voice panel render anyway
      (confirmed live, 2026-08-18 — both panels showed stacked at once). */
   .mode-panel[data-panel="voice"]:not([hidden]) {
-    min-height: 100%;
+    min-height: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
