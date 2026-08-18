@@ -77,7 +77,11 @@
     background: #fff;
     border-radius: 22px;
     overflow-y: auto;
-    max-height: 620px;
+    /* Viewport-relative instead of a fixed px cap — the chat widget's total
+       height (header + history + input) exceeded every fixed number tried
+       (480px, then 620px still clipped the input row), so this only kicks in
+       as a safety net for genuinely tall content instead of guessing again. */
+    max-height: 85vh;
   }
   .mode-panel[hidden] { display: none; }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
