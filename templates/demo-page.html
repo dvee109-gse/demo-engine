@@ -77,10 +77,19 @@
     background: #fff;
     border-radius: 22px;
     overflow-y: auto;
-    max-height: 480px;
-    min-height: 220px;
+    max-height: 620px;
   }
   .mode-panel[hidden] { display: none; }
+  /* The voice widget is just a compact card (avatar + "Call us here"), which
+     looked lost/tiny pinned to the top of a tall frame — center it instead.
+     The chat widget fills the frame on its own (header/messages/input), so it
+     doesn't need this. */
+  .mode-panel[data-panel="voice"] {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 </style>
 </head>
 <body>
