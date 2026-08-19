@@ -78,14 +78,21 @@
     border-radius: 22px;
     overflow-y: auto;
     /* Fixed and modest so the whole phone frame fits comfortably on the page
-       without needing to scroll the page itself to see it (confirmed live,
-       2026-08-18: earlier fixed heights only looked like they clipped the
-       chat widget's input row because of OUR OWN accumulated test-message
-       history in one browser session — a real prospect's fresh conversation
-       fits fine here without internal scrolling either). */
+       without needing to scroll the page itself to see it. Even a single
+       fresh message doesn't fit here without also hiding the widget's own
+       header banner below (confirmed live, 2026-08-18) — the banner alone
+       ate most of this box's height. */
     height: 420px;
   }
   .mode-panel[hidden] { display: none; }
+  /* GHL's chat widget header banner ("Have a question? Our support team is
+     ready...") — confirmed live via DevTools (2026-08-18) to be regular DOM,
+     not shadow-rooted, so it's directly targetable. Our own phone frame
+     already has a Chat tab label, so this banner is redundant chrome that
+     was eating ~170px of the 420px box, leaving no room for the input row. */
+  .mode-panel[data-panel="chat"] .lc_text-widget--header-wrapper {
+    display: none;
+  }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
      looked lost/tiny pinned to the top of a tall frame — center it instead.
      The chat widget fills the frame on its own (header/messages/input), so it
