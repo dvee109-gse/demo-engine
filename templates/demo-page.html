@@ -16,85 +16,80 @@
   header {
     background: var(--accent);
     color: #fff;
-    padding: 1.5rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     text-align: center;
   }
-  header img { max-height: 36px; margin-bottom: 0.5rem; }
-  header h1 { margin: 0 0 0.4rem; font-size: 1.4rem; }
-  /* Scraped business summaries run long (multiple sentences) — clamped to 3
+  header img { max-height: 26px; margin-bottom: 0.3rem; }
+  header h1 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+  /* Scraped business summaries run long (multiple sentences) — clamped to 2
      lines so the header banner doesn't push the phone mockup below the fold
-     on page load. */
+     on page load. Measured against a real 730px viewport (2026-08-18), not
+     guessed — see commit message. */
   header p {
     margin: 0;
     opacity: 0.9;
     max-width: 40rem;
     margin-inline: auto;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  main { max-width: 640px; margin: -1.5rem auto 3rem; padding: 0 1.5rem; }
+  main { max-width: 640px; margin: -1rem auto 2rem; padding: 0 1.5rem; }
   .card {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    padding: 1.5rem;
-    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
     text-align: center;
   }
-  .card p { text-align: left; }
+  .card h2 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+  .card p { text-align: left; margin: 0; font-size: 0.9rem; }
   .card p a { color: var(--accent); font-weight: 600; }
-  .fineprint { font-size: 0.8rem; color: #777; margin-top: 1rem; text-align: left; }
+  .fineprint { font-size: 0.75rem; color: #777; margin-top: 0.75rem; text-align: left; }
 
   /* Phone mockup: one shared frame, tap to switch between the voice and chat
      widgets instead of showing both GHL panels stacked on the page at once. */
   .phone {
-    width: min(300px, 100%);
-    margin: 1rem auto 0;
+    width: min(280px, 100%);
+    margin: 0.75rem auto 0;
     background: #17181c;
-    border-radius: 30px;
-    padding: 12px 8px 14px;
+    border-radius: 26px;
+    padding: 8px 6px 10px;
     box-shadow: 0 16px 40px rgba(0,0,0,0.25);
-  }
-  .phone-notch {
-    width: 70px;
-    height: 5px;
-    background: #3a3b40;
-    border-radius: 3px;
-    margin: 0 auto 12px;
   }
   .mode-toggle {
     display: flex;
     gap: 0.3rem;
     background: #26272d;
     border-radius: 999px;
-    padding: 4px;
-    margin-bottom: 10px;
+    padding: 3px;
+    margin-bottom: 8px;
   }
   .mode-btn {
     flex: 1;
     border: none;
     background: transparent;
     color: #9a9ba3;
-    padding: 0.55rem 0.5rem;
+    padding: 0.4rem 0.5rem;
     border-radius: 999px;
     font: inherit;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     cursor: pointer;
   }
   .mode-btn.active { background: var(--accent); color: #fff; }
   .phone-screen {
     background: #fff;
-    border-radius: 20px;
+    border-radius: 18px;
     overflow-y: auto;
     /* Fixed and modest so the whole phone component (header text above it +
-       this frame) fits within a typical viewport on page load without
-       needing to scroll to even see it — the chat panel scrolls internally
-       for its own content instead, same as a real messaging app. */
-    height: 320px;
+       this frame) fits within a real measured 730px viewport on page load
+       without needing to scroll to even see it — the chat panel scrolls
+       internally for its own content instead, same as a real messaging app. */
+    height: 230px;
   }
   .mode-panel[hidden] { display: none; }
   /* GHL's chat widget header banner ("Have a question? Our support team is
@@ -113,7 +108,7 @@
      wins on source order, making the "hidden" voice panel render anyway
      (confirmed live, 2026-08-18 — both panels showed stacked at once). */
   .mode-panel[data-panel="voice"]:not([hidden]) {
-    min-height: 320px;
+    min-height: 230px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,7 +128,6 @@
       <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Tap below to talk to it or chat with it — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
 
       <div class="phone">
-        <div class="phone-notch"></div>
         <div class="mode-toggle">
           <button type="button" class="mode-btn active" data-mode="voice">Talk</button>
           <button type="button" class="mode-btn" data-mode="chat">Chat</button>
