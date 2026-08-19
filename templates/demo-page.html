@@ -85,11 +85,12 @@
     background: #fff;
     border-radius: 18px;
     overflow-y: auto;
-    /* Fixed and modest so the whole phone component (header text above it +
-       this frame) fits within a real measured 730px viewport on page load
-       without needing to scroll to even see it — the chat panel scrolls
-       internally for its own content instead, same as a real messaging app. */
-    height: 230px;
+    /* Sized to use the remaining budget after the compacted header/card text,
+       against the real measured 730px viewport (2026-08-18) — 230px left too
+       much empty space below the card on a taller window; this still leaves
+       headroom on the 730px case since header/card were shrunk substantially
+       in the same change that first tried 230px. */
+    height: 320px;
   }
   .mode-panel[hidden] { display: none; }
   /* GHL's chat widget header banner ("Have a question? Our support team is
@@ -108,7 +109,7 @@
      wins on source order, making the "hidden" voice panel render anyway
      (confirmed live, 2026-08-18 — both panels showed stacked at once). */
   .mode-panel[data-panel="voice"]:not([hidden]) {
-    min-height: 230px;
+    min-height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
