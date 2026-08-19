@@ -16,19 +16,32 @@
   header {
     background: var(--accent);
     color: #fff;
-    padding: 2.5rem 1.5rem;
+    padding: 1.5rem 1.5rem;
     text-align: center;
   }
-  header img { max-height: 48px; margin-bottom: 0.75rem; }
-  header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
-  header p { margin: 0; opacity: 0.9; max-width: 40rem; margin-inline: auto; }
+  header img { max-height: 36px; margin-bottom: 0.5rem; }
+  header h1 { margin: 0 0 0.4rem; font-size: 1.4rem; }
+  /* Scraped business summaries run long (multiple sentences) — clamped to 3
+     lines so the header banner doesn't push the phone mockup below the fold
+     on page load. */
+  header p {
+    margin: 0;
+    opacity: 0.9;
+    max-width: 40rem;
+    margin-inline: auto;
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   main { max-width: 640px; margin: -1.5rem auto 3rem; padding: 0 1.5rem; }
   .card {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    padding: 1.75rem;
-    margin-top: 1.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
     text-align: center;
   }
   .card p { text-align: left; }
@@ -38,11 +51,11 @@
   /* Phone mockup: one shared frame, tap to switch between the voice and chat
      widgets instead of showing both GHL panels stacked on the page at once. */
   .phone {
-    width: min(320px, 100%);
-    margin: 1.5rem auto 0;
+    width: min(300px, 100%);
+    margin: 1rem auto 0;
     background: #17181c;
-    border-radius: 34px;
-    padding: 14px 10px 18px;
+    border-radius: 30px;
+    padding: 12px 8px 14px;
     box-shadow: 0 16px 40px rgba(0,0,0,0.25);
   }
   .phone-notch {
@@ -75,14 +88,13 @@
   .mode-btn.active { background: var(--accent); color: #fff; }
   .phone-screen {
     background: #fff;
-    border-radius: 22px;
+    border-radius: 20px;
     overflow-y: auto;
-    /* Fixed and modest so the whole phone frame fits comfortably on the page
-       without needing to scroll the page itself to see it. Even a single
-       fresh message doesn't fit here without also hiding the widget's own
-       header banner below (confirmed live, 2026-08-18) — the banner alone
-       ate most of this box's height. */
-    height: 420px;
+    /* Fixed and modest so the whole phone component (header text above it +
+       this frame) fits within a typical viewport on page load without
+       needing to scroll to even see it — the chat panel scrolls internally
+       for its own content instead, same as a real messaging app. */
+    height: 320px;
   }
   .mode-panel[hidden] { display: none; }
   /* GHL's chat widget header banner ("Have a question? Our support team is
@@ -101,7 +113,7 @@
      wins on source order, making the "hidden" voice panel render anyway
      (confirmed live, 2026-08-18 — both panels showed stacked at once). */
   .mode-panel[data-panel="voice"]:not([hidden]) {
-    min-height: 420px;
+    min-height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
