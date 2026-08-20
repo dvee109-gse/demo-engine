@@ -82,14 +82,14 @@
     background: #fff;
     border-radius: 18px;
     overflow-y: auto;
-    /* Tried hiding GHL's header banner (failed, likely re-asserted by their
-       JS) and pinning the input row with position:sticky (also failed live,
-       2026-08-19 — likely a nested scroll container or other structural
-       quirk inside the widget that external CSS can't reach around). Settled
-       on just sizing the box tall enough to fit banner + a message + input
-       without internal scrolling, which is the one approach confirmed to
-       actually work. */
-    height: 400px;
+    /* GHL's own widget correctly pins its input row and scrolls its message
+       list internally — but only when given enough natural room. Fixed
+       heights (320px, 400px) squeezed it below that threshold and broke its
+       own layout, cutting off the input regardless of our height-hiding or
+       sticky-positioning attempts. Viewport-relative instead of another
+       fixed guess, confirmed live (2026-08-19) to let the widget's own
+       correct behavior actually work. */
+    max-height: 85vh;
   }
   .mode-panel[hidden] { display: none; }
   /* The voice widget is just a compact card (avatar + "Call us here"), which
@@ -100,7 +100,7 @@
      wins on source order, making the "hidden" voice panel render anyway
      (confirmed live, 2026-08-18 — both panels showed stacked at once). */
   .mode-panel[data-panel="voice"]:not([hidden]) {
-    min-height: 400px;
+    min-height: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
