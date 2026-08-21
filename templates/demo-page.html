@@ -45,9 +45,6 @@
     margin-top: 0.75rem;
     text-align: center;
   }
-  .card h2 { margin: 0 0 0.5rem; font-size: 1.1rem; }
-  .card p { text-align: left; margin: 0; font-size: 0.9rem; }
-  .card p a { color: var(--accent); font-weight: 600; }
   .fineprint { font-size: 0.75rem; color: #777; margin-top: 0.75rem; text-align: left; }
 
   /* Phone mockup: one shared frame, tap to switch between the voice and chat
@@ -124,9 +121,6 @@
 
   <main>
     <div class="card">
-      <h2>Try it like a customer would</h2>
-      <p>It's trained on {{businessName}}'s own services and answers questions the way a real front-desk hire would. Tap below to talk to it or chat with it — or prefer an actual phone call? <a id="call-link" href="tel:{{voiceNumber}}">Dial {{voiceNumber}}</a>.</p>
-
       <div class="phone">
         <div class="mode-toggle">
           <button type="button" class="mode-btn active" data-mode="voice">Talk</button>
@@ -152,12 +146,12 @@
   <script>
     // Tracking beacon: fires once, on first real interaction, back to the GHL
     // inbound-webhook workflow that moves the pipeline to "AI Mockup Opened".
-    // Only wired to the phone link click and the mode toggle for now — a real
-    // signal of intent. GHL's chat/voice widgets expose
-    // window.leadConnector.chatWidget and an "LC_chatWidgetLoaded" event, but
-    // that fires on page load (script ready), not on the visitor actually
-    // opening/using the widget, so it's not a usable engagement signal —
-    // swap in a real open/message event if GHL exposes one later.
+    // Wired to the mode-toggle taps — a real signal of intent. GHL's chat/
+    // voice widgets expose window.leadConnector.chatWidget and an
+    // "LC_chatWidgetLoaded" event, but that fires on page load (script
+    // ready), not on the visitor actually opening/using the widget, so it's
+    // not a usable engagement signal — swap in a real open/message event if
+    // GHL exposes one later.
     const BEACON_URL = "{{beaconUrl}}";
     let fired = false;
     function fireBeacon() {
@@ -169,7 +163,6 @@
         body: JSON.stringify({ contactId: "{{contactId}}", event: "demo_engaged" }),
       }).catch(() => {});
     }
-    document.getElementById("call-link").addEventListener("click", fireBeacon);
 
     document.querySelectorAll(".mode-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
