@@ -131,6 +131,17 @@
     position: relative;
   }
   .mode-panel[data-panel="chat"] > * {
+    /* Confirmed live (2026-08-20) via DevTools: <chat-widget>'s own
+       scrollHeight is 0 despite being visibly large — it renders via Shadow
+       DOM as an internally position:fixed overlay, not normal document flow,
+       so its own box has zero height. transform makes it the containing
+       block for its own shadow-DOM content, but a ZERO-height containing
+       block makes "bottom:0" (the pinned input row) resolve to the same
+       coordinate as "top:0" — pushing the input to overlap the header
+       instead of sitting at the true bottom. Giving it an explicit height
+       BEFORE scaling fixes that math, then scale shrinks the whole
+       (now-correct) result uniformly afterward. */
+    height: var(--chat-natural-h);
     transform: scale(var(--chat-scale));
     transform-origin: top left;
     width: calc(100% / var(--chat-scale));
