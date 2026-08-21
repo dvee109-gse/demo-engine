@@ -110,6 +110,31 @@
     align-items: center;
     justify-content: center;
   }
+  /* Chat, scaled to match the Talk panel's compact 420px size. Every attempt
+     to constrain the widget's HEIGHT directly (fixed px, hiding its header,
+     sticky-positioning its input) broke its own internal input-pinning
+     behavior, which only works when it's allowed to render at its natural
+     full size (confirmed: that's what 85vh on .phone-screen was giving it).
+     transform:scale() sidesteps that entirely — the widget still renders at
+     its full natural size (~700px estimated) and lays itself out correctly,
+     THEN gets visually shrunk as a whole afterward, so the already-correct
+     internal pinning is preserved at the smaller visual size. width is
+     compensated (1/scale) so the shrunk content still fills the box's width
+     instead of leaving empty space on the right. If input still ends up
+     clipped, the 700px height estimate below the scale math is off — adjust
+     --chat-natural-h, not this technique. */
+  .mode-panel[data-panel="chat"] {
+    --chat-natural-h: 700px;
+    --chat-scale: calc(420px / var(--chat-natural-h));
+    height: 420px;
+    overflow: hidden;
+    position: relative;
+  }
+  .mode-panel[data-panel="chat"] > * {
+    transform: scale(var(--chat-scale));
+    transform-origin: top left;
+    width: calc(100% / var(--chat-scale));
+  }
 </style>
 </head>
 <body>
