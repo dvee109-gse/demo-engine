@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{{businessName}} — AI Demo</title>
 <style>
+  /* Before touching .phone-screen's max-height below: it must stay a
+     viewport-relative value (85vh), never a fixed px number — see the
+     warning comment on that rule for why. */
   :root { --accent: {{primaryColor}}; }
   * { box-sizing: border-box; }
   body {
@@ -82,13 +85,18 @@
     background: #fff;
     border-radius: 18px;
     overflow-y: auto;
-    /* GHL's own widget correctly pins its input row and scrolls its message
-       list internally — but only when given enough natural room. Fixed
-       heights (320px, 400px) squeezed it below that threshold and broke its
-       own layout, cutting off the input regardless of our height-hiding or
-       sticky-positioning attempts. Viewport-relative instead of another
-       fixed guess, confirmed live (2026-08-19) to let the widget's own
-       correct behavior actually work. */
+    /* ============================================================
+       DO NOT replace max-height: 85vh with a fixed px value (420px,
+       400px, 320px, 280px, 230px all tried and failed). GHL's chat
+       widget correctly pins its own input row and scrolls its message
+       list internally — but ONLY when its container isn't squeezed
+       below its natural layout height. Every fixed px value broke
+       that internal behavior and clipped the "Type a message" input
+       off-screen, confirmed live and re-broken multiple times in this
+       exact spot on 2026-08-18/19. If the frame looks too tall, fix
+       it by shrinking the header/card sections above (see .header,
+       .card), NOT this value.
+       ============================================================ */
     max-height: 85vh;
   }
   .mode-panel[hidden] { display: none; }
