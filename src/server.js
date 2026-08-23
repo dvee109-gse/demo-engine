@@ -17,6 +17,16 @@ app.get("/health", (_req, res) => res.json({ ok: true, primed: getPrimed() }));
 // Renders the demo page fresh on every request — see demoPageBuilder.js for why
 // this isn't a static file. The render data was persisted to GHL (durable) at
 // pipeline time via saveDemoPageData() below.
+//
+// Reprimes the shared bot on every view, not just once at pipeline time: this
+// is a shared-bot design (one Conversation AI agent, one Voice AI agent, one
+// Knowledge Base reused across every prospect), so if a second demo gets
+// triggered for a different prospect before this one is opened, the bot would
+// otherwise still be primed with the WRONG business by the time this person
+// clicks their link. Reconfirmed live via config.js/contentBuilder.js: only
+// businessName/logoUrl/primaryColor/heroText were being persisted, not the
+// actual KB content, so there was no way to even re-derive it without
+// rescraping. Now persists the full content and reprimes right before render.
 app.get("/demos/:contactId", async (req, res) => {
   const { contactId } = req.params;
   try {
@@ -25,9 +35,11 @@ app.get("/demos/:contactId", async (req, res) => {
     if (!raw) {
       return res.status(404).send("Demo not found for this contact.");
     }
-    const variables = JSON.parse(raw);
+    const content = JSON.parse(raw);
+    console.log(`[server] ${contactId}: repriming shared bot before render — ${content.variables.businessName}`);
+    await primeSharedBot(content);
     const beaconUrl = `${config.demoBaseUrl}/beacon`;
-    const html = await renderDemoPage(variables, { contactId, beaconUrl });
+    const html = await renderDemoPage(content.variables, { contactId, beaconUrl });
     res.set("Content-Type", "text/html").send(html);
   } catch (err) {
     console.error(`[server] failed to render demo for ${contactId}:`, err.message);
@@ -45,16 +57,30 @@ function findCustomFieldValue(contactResponse, fieldId) {
   return match?.value ?? match?.fieldValue ?? null;
 }
 
-/** Persists the render data GET /demos/:contactId needs, into GHL (durable) instead
- * of local disk (wiped on every restart — see demoPageBuilder.js). */
-async function saveDemoPageData(contactId, variables) {
+/** Persists the FULL content GET /demos/:contactId needs — not just display
+ * variables — into GHL (durable) instead of local disk (wiped on every
+ * restart — see demoPageBuilder.js). businessSummary/faqPairs are what let
+ * the demo page reprime the shared bot on every view (see the /demos/:contactId
+ * route above) without having to rescrape the site from scratch. */
+async function saveDemoPageData(contactId, content) {
   const payload = JSON.stringify({
-    businessName: variables.businessName,
-    logoUrl: variables.logoUrl,
-    primaryColor: variables.primaryColor,
-    heroText: variables.heroText,
+    businessSummary: content.businessSummary,
+    faqPairs: content.faqPairs,
+    variables: content.variables,
   });
   await updateContactCustomField(contactId, config.ghl.fieldIds.servicesSummary, payload);
+}
+
+/** Reprimes the shared Knowledge Base + Conversation AI + Voice AI agent with
+ * one prospect's content. Called both right after the scrape pipeline
+ * completes and again on every /demos/:contactId view — see that route for why. */
+async function primeSharedBot(content) {
+  await primeKnowledgeBase(content);
+  await primeAgent({
+    businessName: content.variables.businessName,
+    heroText: content.variables.heroText,
+  });
+  await primeVoiceAgent({ businessName: content.variables.businessName });
 }
 
 // Fired by the GHL workflow when an opportunity moves to "Send Mockup" (blueprint §3.3).
@@ -118,15 +144,10 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
   markPrimed(contactId, content.variables.businessName);
 
   console.log(`[pipeline] ${contactId}: priming knowledge base + agent`);
-  await primeKnowledgeBase(content);
-  await primeAgent({
-    businessName: content.variables.businessName,
-    heroText: content.variables.heroText,
-  });
-  await primeVoiceAgent({ businessName: content.variables.businessName });
+  await primeSharedBot(content);
 
   console.log(`[pipeline] ${contactId}: saving demo page data`);
-  await saveDemoPageData(contactId, content.variables);
+  await saveDemoPageData(contactId, content);
   const demoLink = getDemoUrl(contactId);
 
   console.log(`[pipeline] ${contactId}: notifying GHL — ${demoLink}`);
