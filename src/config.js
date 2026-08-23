@@ -25,7 +25,6 @@ export const config = {
     // own Sites > Chat Widgets entry (Agent tab -> Voice AI Agent), a WebRTC
     // browser mic widget distinct from the text chat widget above.
     voiceWidgetEmbed: process.env.GHL_VOICE_WIDGET_EMBED || "",
-    voiceNumber: process.env.GHL_VOICE_NUMBER || "",
     demoReadyWebhookUrl: required("GHL_DEMO_READY_WEBHOOK_URL", process.env.GHL_DEMO_READY_WEBHOOK_URL),
     needsReviewWebhookUrl: process.env.GHL_NEEDS_REVIEW_WEBHOOK_URL || "",
 

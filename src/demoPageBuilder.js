@@ -32,7 +32,6 @@ export async function renderDemoPage(variables, { contactId, beaconUrl }) {
     logoUrl: variables.logoUrl,
     primaryColor: variables.primaryColor || "#1a1a1a",
     heroText: variables.heroText,
-    voiceNumber: config.ghl.voiceNumber,
     chatWidgetEmbed: config.ghl.chatWidgetEmbed,
     voiceWidgetEmbed: config.ghl.voiceWidgetEmbed,
     beaconUrl: beaconUrl || "",
