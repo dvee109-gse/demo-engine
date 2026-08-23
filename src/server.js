@@ -81,7 +81,25 @@ app.post("/demo", async (req, res) => {
 
 async function runPipeline({ contactId, businessName, websiteUrl, email, phone }) {
   console.log(`[pipeline] ${contactId}: scraping ${websiteUrl}`);
-  const scrape = await scrapeSite(websiteUrl);
+  let scrape;
+  try {
+    scrape = await scrapeSite(websiteUrl);
+  } catch (err) {
+    // Network-level failures (DNS, timeout, connection reset, empty response)
+    // throw from Playwright's page.goto() rather than returning a bad
+    // httpStatus — confirmed live (2026-08-22) via httpstat.us/404, which
+    // returns net::ERR_EMPTY_RESPONSE instead of a clean 404. Without this,
+    // the whole pipeline crashed before ever reaching the quality gate, so
+    // notifyNeedsReview() never ran and nothing told the agency to follow up.
+    console.warn(`[pipeline] ${contactId}: scrape failed — ${err.message}`);
+    await notifyNeedsReview({
+      contactId,
+      businessName: businessName || "this business",
+      reasons: [`Site could not be reached: ${err.message}`],
+      email,
+    });
+    return;
+  }
   scrape.businessName = scrape.businessName || businessName || "your business";
   scrape.phone = scrape.phone || phone || "";
 
