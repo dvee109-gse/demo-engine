@@ -36,10 +36,19 @@ app.get("/demos/:contactId", async (req, res) => {
       return res.status(404).send("Demo not found for this contact.");
     }
     const content = JSON.parse(raw);
-    console.log(`[server] ${contactId}: repriming shared bot before render — ${content.variables.businessName}`);
-    await primeSharedBot(content);
+    // Demo pages saved before this reprime-on-view feature stored a flat
+    // {businessName, logoUrl, ...} object with no businessSummary/faqPairs —
+    // there's nothing to reprime with, so fall back to rendering as before
+    // rather than crashing on content.variables being undefined.
+    const variables = content.variables || content;
+    if (content.businessSummary && content.faqPairs) {
+      console.log(`[server] ${contactId}: repriming shared bot before render — ${variables.businessName}`);
+      await primeSharedBot(content);
+    } else {
+      console.warn(`[server] ${contactId}: no saved businessSummary/faqPairs (pre-reprime-on-view data) — rendering without repriming`);
+    }
     const beaconUrl = `${config.demoBaseUrl}/beacon`;
-    const html = await renderDemoPage(content.variables, { contactId, beaconUrl });
+    const html = await renderDemoPage(variables, { contactId, beaconUrl });
     res.set("Content-Type", "text/html").send(html);
   } catch (err) {
     console.error(`[server] failed to render demo for ${contactId}:`, err.message);
