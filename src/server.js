@@ -18,15 +18,22 @@ app.get("/health", (_req, res) => res.json({ ok: true, primed: getPrimed() }));
 // this isn't a static file. The render data was persisted to GHL (durable) at
 // pipeline time via saveDemoPageData() below.
 //
-// Reprimes the shared bot on every view, not just once at pipeline time: this
-// is a shared-bot design (one Conversation AI agent, one Voice AI agent, one
-// Knowledge Base reused across every prospect), so if a second demo gets
-// triggered for a different prospect before this one is opened, the bot would
-// otherwise still be primed with the WRONG business by the time this person
-// clicks their link. Reconfirmed live via config.js/contentBuilder.js: only
-// businessName/logoUrl/primaryColor/heroText were being persisted, not the
-// actual KB content, so there was no way to even re-derive it without
-// rescraping. Now persists the full content and reprimes right before render.
+// Reprimes the shared bot before render, but ONLY when it isn't already
+// correctly primed for this contact — this is a shared-bot design (one
+// Conversation AI agent, one Voice AI agent, one Knowledge Base reused across
+// every prospect), so if a second demo gets triggered for a different
+// prospect before this one is opened, the bot would otherwise still be primed
+// with the WRONG business by the time this person clicks their link.
+// Unconditionally repriming on every view (the first version of this fix)
+// caused an 11+ second load on every single view, confirmed live
+// (2026-08-23) — repriming means ~10-20+ sequential GHL API calls (KB
+// description, FAQ list/delete/recreate, agent PUT, voice agent PATCH), which
+// is fine to pay once when the bot's state is actually stale, but not on
+// every repeat view of the same demo. getPrimed() tracks who the bot is
+// CURRENTLY primed for (in-memory — resets on restart, which just means the
+// next view reprimes again, a safe fallback) so repeat views by the same
+// person, or views while no other demo has been triggered since, skip the
+// expensive reprime entirely.
 app.get("/demos/:contactId", async (req, res) => {
   const { contactId } = req.params;
   try {
@@ -42,8 +49,13 @@ app.get("/demos/:contactId", async (req, res) => {
     // rather than crashing on content.variables being undefined.
     const variables = content.variables || content;
     if (content.businessSummary && content.faqPairs) {
-      console.log(`[server] ${contactId}: repriming shared bot before render — ${variables.businessName}`);
-      await primeSharedBot(content);
+      if (getPrimed()?.contactId === contactId) {
+        console.log(`[server] ${contactId}: already primed for ${variables.businessName} — skipping reprime`);
+      } else {
+        console.log(`[server] ${contactId}: repriming shared bot before render — ${variables.businessName}`);
+        await primeSharedBot(content);
+        markPrimed(contactId, variables.businessName);
+      }
     } else {
       console.warn(`[server] ${contactId}: no saved businessSummary/faqPairs (pre-reprime-on-view data) — rendering without repriming`);
     }
