@@ -1,10 +1,11 @@
 import express from "express";
+import { randomInt } from "node:crypto";
 import { config } from "./config.js";
 import { scrapeSite } from "./scraper.js";
 import { buildKnowledgeContent } from "./contentBuilder.js";
 import { extractWithLLM } from "./llmExtractor.js";
 import { primeKnowledgeBase, primeAgent, primeVoiceAgent, notifyDemoReady, notifyNeedsReview } from "./ghlClient.js";
-import { getContact, updateContactCustomField } from "./ghlAdmin.js";
+import { getContact, updateContactCustomField, findContactByShortCode } from "./ghlAdmin.js";
 import { renderDemoPage, getDemoUrl } from "./demoPageBuilder.js";
 import { markPrimed, getPrimed } from "./store.js";
 import { assessScrapeQuality } from "./qualityGate.js";
@@ -34,8 +35,29 @@ app.get("/health", (_req, res) => res.json({ ok: true, primed: getPrimed() }));
 // next view reprimes again, a safe fallback) so repeat views by the same
 // person, or views while no other demo has been triggered since, skip the
 // expensive reprime entirely.
-app.get("/demos/:contactId", async (req, res) => {
-  const { contactId } = req.params;
+app.get("/demos/:contactId", (req, res) => renderDemoResponse(req.params.contactId, res));
+
+// Short-link route — this is the one actually emailed to prospects (see
+// getDemoUrl() in demoPageBuilder.js). Resolves the short code back to a
+// contactId via GHL's Contact Search Advanced API (confirmed live,
+// 2026-08-26: filtering by customFields.{id}+eq works) instead of needing our
+// own database, since Render's filesystem is ephemeral. /demos/:contactId
+// above still works directly for any already-sent long-form links.
+app.get("/d/:code", async (req, res) => {
+  const { code } = req.params;
+  try {
+    const contact = await findContactByShortCode(code.toUpperCase());
+    if (!contact) {
+      return res.status(404).send("Demo not found for this link.");
+    }
+    await renderDemoResponse(contact.id, res);
+  } catch (err) {
+    console.error(`[server] failed to resolve short code ${code}:`, err.message);
+    res.status(500).send("Could not load this demo right now.");
+  }
+});
+
+async function renderDemoResponse(contactId, res) {
   try {
     const contact = await getContact(contactId);
     const raw = findCustomFieldValue(contact, config.ghl.fieldIds.servicesSummary);
@@ -66,7 +88,7 @@ app.get("/demos/:contactId", async (req, res) => {
     console.error(`[server] failed to render demo for ${contactId}:`, err.message);
     res.status(500).send("Could not load this demo right now.");
   }
-});
+}
 
 // GET /contacts/{id}'s customFields shape wasn't fully confirmed against a live
 // response for this build — handle a couple of plausible shapes rather than
@@ -90,6 +112,32 @@ async function saveDemoPageData(contactId, content) {
     variables: content.variables,
   });
   await updateContactCustomField(contactId, config.ghl.fieldIds.servicesSummary, payload);
+}
+
+// Excludes visually ambiguous characters (0/O, 1/I/L) so a typed-by-hand code
+// (the whole point of this — see getDemoUrl()) isn't a guessing game.
+const SHORT_CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+function generateShortCode(length = 6) {
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += SHORT_CODE_ALPHABET[randomInt(SHORT_CODE_ALPHABET.length)];
+  }
+  return code;
+}
+
+/** Generates a short code for this contact and saves it, retrying on the
+ * astronomically unlikely case of a collision (32^6 ≈ 1B possible codes —
+ * this is just cheap insurance, not a real expected occurrence). */
+async function assignShortCode(contactId) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateShortCode();
+    const existing = await findContactByShortCode(code);
+    if (!existing) {
+      await updateContactCustomField(contactId, config.ghl.fieldIds.shortCode, code);
+      return code;
+    }
+  }
+  throw new Error("Could not generate a unique short code after 5 attempts");
 }
 
 /** Reprimes the shared Knowledge Base + Conversation AI + Voice AI agent with
@@ -169,7 +217,8 @@ async function runPipeline({ contactId, businessName, websiteUrl, email, phone }
 
   console.log(`[pipeline] ${contactId}: saving demo page data`);
   await saveDemoPageData(contactId, content);
-  const demoLink = getDemoUrl(contactId);
+  const shortCode = await assignShortCode(contactId);
+  const demoLink = getDemoUrl(shortCode);
 
   console.log(`[pipeline] ${contactId}: notifying GHL — ${demoLink}`);
   await notifyDemoReady({ contactId, demoLink, businessName: content.variables.businessName, email });

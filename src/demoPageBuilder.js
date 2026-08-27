@@ -39,7 +39,11 @@ export async function renderDemoPage(variables, { contactId, beaconUrl }) {
   });
 }
 
-/** The demo link is deterministic from contactId — no page needs to exist yet to compute it. */
-export function getDemoUrl(contactId) {
-  return `${config.demoBaseUrl}/demos/${contactId}`;
+/** The short-code link (see server.js's /d/:code route) — this is the one
+ * that actually gets emailed to prospects. Short and typeable by hand, unlike
+ * the long /demos/{contactId} URL, which is painful to type manually and is
+ * the only workaround for a rare but real connection issue some networks hit
+ * on the first tap of a link (confirmed live, 2026-08-25). */
+export function getDemoUrl(shortCode) {
+  return `${config.demoBaseUrl}/d/${shortCode}`;
 }

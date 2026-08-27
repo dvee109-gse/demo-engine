@@ -104,6 +104,28 @@ export async function updateContactCustomField(contactId, fieldId, value) {
   });
 }
 
+/** Confirmed live (2026-08-26): POST /contacts/search supports filtering by a
+ * custom field's value via `customFields.{fieldId}` + operator "eq" — used to
+ * resolve a short code (see server.js's /d/:code route) back to a contactId
+ * without needing our own database, since Render's filesystem is ephemeral. */
+export async function findContactByShortCode(code) {
+  const result = await ghlAdminRequest("/contacts/search", {
+    method: "POST",
+    body: {
+      locationId: config.ghl.locationId,
+      pageLimit: 1,
+      filters: [
+        {
+          field: `customFields.${config.ghl.fieldIds.shortCode}`,
+          operator: "eq",
+          value: code,
+        },
+      ],
+    },
+  });
+  return result.contacts?.[0] || null;
+}
+
 export async function createOpportunity({ pipelineId, stageId, contactId, name }) {
   return ghlAdminRequest("/opportunities/", {
     method: "POST",

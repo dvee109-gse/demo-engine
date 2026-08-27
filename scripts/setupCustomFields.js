@@ -8,6 +8,13 @@ const FIELDS = [
   { name: "Demo Link", dataType: "TEXT", model: "contact" },
   { name: "Business Name", dataType: "TEXT", model: "contact" },
   { name: "Services Summary", dataType: "LARGE_TEXT", model: "contact" },
+  // Short random code for the /d/:code short-link route (server.js) — a
+  // typeable fallback when a prospect can't tap the link directly (confirmed
+  // live, 2026-08-25: the full /demos/{contactId} URL is genuinely painful to
+  // type manually, which is the only workaround for a rare but real
+  // HTTP/3/QUIC connection issue on some networks). Searchable via GHL's
+  // Contact Search Advanced API (confirmed live: customFields.{id} + eq works).
+  { name: "Short Code", dataType: "TEXT", model: "contact" },
 ];
 
 async function main() {

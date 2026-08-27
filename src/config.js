@@ -36,6 +36,8 @@ export const config = {
       // Repurposed to store a small JSON blob (logoUrl/primaryColor/heroText)
       // so demo pages can be rebuilt on every request — see demoPageBuilder.js.
       servicesSummary: process.env.GHL_FIELD_SERVICES_SUMMARY_ID || "",
+      // Short random code for the /d/:code short-link route — see server.js.
+      shortCode: process.env.GHL_FIELD_SHORT_CODE_ID || "",
     },
   },
 
