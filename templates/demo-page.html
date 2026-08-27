@@ -13,54 +13,75 @@
   body {
     margin: 0;
     font-family: ui-sans-serif, "Segoe UI", system-ui, sans-serif;
-    background: #f5f5f4;
-    color: #1a1a1a;
+    background: #0a0a12;
+    background: radial-gradient(ellipse 90% 55% at 50% -10%, color-mix(in srgb, var(--accent) 32%, #0a0a12), #0a0a12 65%);
+    color: #e4e4ea;
+    min-height: 100vh;
   }
   header {
-    background: var(--accent);
-    color: #fff;
-    padding: 0.9rem 1.5rem;
+    padding: 2.75rem 1.5rem 1.25rem;
     text-align: center;
   }
-  header img { max-height: 26px; margin-bottom: 0.3rem; }
-  header h1 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+  header img {
+    max-height: 32px;
+    margin-bottom: 0.85rem;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
+  }
+  header h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, #fff, color-mix(in srgb, var(--accent) 65%, #fff));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   /* Scraped business summaries run long (multiple sentences) — clamped to 2
      lines so the header banner doesn't push the phone mockup below the fold
      on page load. Measured against a real 730px viewport (2026-08-18), not
      guessed — see commit message. */
   header p {
     margin: 0;
-    opacity: 0.9;
-    max-width: 40rem;
+    opacity: 0.65;
+    max-width: 32rem;
     margin-inline: auto;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  main { max-width: 640px; margin: -1rem auto 2rem; padding: 0 1.5rem; }
+  main { max-width: 640px; margin: 0 auto 3rem; padding: 0 1.5rem; }
   .card {
-    padding: 1rem 1.25rem;
-    margin-top: 0.75rem;
+    padding: 0;
     text-align: center;
   }
-  .fineprint { font-size: 0.75rem; color: #777; margin-top: 0.75rem; text-align: left; }
+  .fineprint { font-size: 0.75rem; color: rgba(228,228,234,0.4); margin-top: 1.25rem; text-align: center; }
 
   /* Phone mockup: one shared frame, tap to switch between the voice and chat
      widgets instead of showing both GHL panels stacked on the page at once. */
   .phone {
     width: min(280px, 100%);
-    margin: 0.75rem auto 0;
-    background: #17181c;
-    border-radius: 26px;
+    margin: 1.5rem auto 0;
+    background: linear-gradient(160deg, #24252f, #15161d);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 32px;
     padding: 8px 6px 10px;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+    box-shadow:
+      0 24px 60px -12px rgba(0,0,0,0.6),
+      0 0 90px -24px color-mix(in srgb, var(--accent) 55%, transparent);
+    animation: phone-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes phone-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
   .mode-toggle {
     display: flex;
     gap: 0.3rem;
-    background: #26272d;
+    background: rgba(255,255,255,0.06);
     border-radius: 999px;
     padding: 3px;
     margin-bottom: 8px;
@@ -69,15 +90,20 @@
     flex: 1;
     border: none;
     background: transparent;
-    color: #9a9ba3;
-    padding: 0.4rem 0.5rem;
+    color: #9a9ba8;
+    padding: 0.5rem 0.5rem;
     border-radius: 999px;
     font: inherit;
     font-weight: 600;
     font-size: 0.8rem;
     cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   }
-  .mode-btn.active { background: var(--accent); color: #fff; }
+  .mode-btn.active {
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 65%, #000));
+    color: #fff;
+    box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
   .phone-screen {
     background: #fff;
     border-radius: 18px;
@@ -132,8 +158,8 @@
     <div class="card">
       <div class="phone">
         <div class="mode-toggle">
-          <button type="button" class="mode-btn active" data-mode="voice">Talk</button>
-          <button type="button" class="mode-btn" data-mode="chat">Chat</button>
+          <button type="button" class="mode-btn active" data-mode="voice">🎙️ Talk</button>
+          <button type="button" class="mode-btn" data-mode="chat">💬 Chat</button>
         </div>
         <div class="phone-screen">
           <!-- GHL Voice AI Chat Widget embed — the main feature of this demo,
