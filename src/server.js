@@ -50,16 +50,21 @@ app.get("/d/:code", async (req, res) => {
     if (!contact) {
       return res.status(404).send("Demo not found for this link.");
     }
-    await renderDemoResponse(contact.id, res);
+    // The search result already has the full customFields array we need —
+    // pass it straight through instead of making a second getContact() call
+    // for the same contact, shaving an API round-trip off the load time for
+    // the route real prospects actually use (see the years of debugging this
+    // session put into keeping that load fast for mobile Mail clients).
+    await renderDemoResponse(contact.id, res, contact);
   } catch (err) {
     console.error(`[server] failed to resolve short code ${code}:`, err.message);
     res.status(500).send("Could not load this demo right now.");
   }
 });
 
-async function renderDemoResponse(contactId, res) {
+async function renderDemoResponse(contactId, res, prefetchedContact = null) {
   try {
-    const contact = await getContact(contactId);
+    const contact = prefetchedContact || (await getContact(contactId));
     const raw = findCustomFieldValue(contact, config.ghl.fieldIds.servicesSummary);
     if (!raw) {
       return res.status(404).send("Demo not found for this contact.");
