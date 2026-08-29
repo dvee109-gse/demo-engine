@@ -16,6 +16,11 @@ const RECORD_PROFILE_TOOL = {
         description:
           "2-4 sentence factual description of what the business does, using only what the text states.",
       },
+      tagline: {
+        type: "string",
+        description:
+          "A short, punchy one-line subheading for a landing page — under 12 words, no period at the end. Distinct from `summary`: this is display copy (like 'Custom homes built through a proven 3-step process'), not a full description. Still must be strictly factual, using only what the text states — no invented claims.",
+      },
       services: {
         type: "array",
         items: { type: "string" },
@@ -37,7 +42,7 @@ const RECORD_PROFILE_TOOL = {
           "5-8 question/answer pairs a prospective customer would plausibly ask, answered using only facts stated in the text.",
       },
     },
-    required: ["summary", "services", "faqPairs"],
+    required: ["summary", "tagline", "services", "faqPairs"],
     additionalProperties: false,
   },
 };

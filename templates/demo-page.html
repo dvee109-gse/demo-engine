@@ -37,10 +37,10 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  /* Scraped business summaries run long (multiple sentences) — clamped to 2
-     lines so the header banner doesn't push the phone mockup below the fold
-     on page load. Measured against a real 730px viewport (2026-08-18), not
-     guessed — see commit message. */
+  /* This now renders a short LLM-generated tagline (contentBuilder.js), not
+     a full paragraph, so it should rarely if ever hit this clamp — kept as a
+     safety net for the fallback path (no LLM pass) or an occasional
+     longer-than-requested tagline, not the primary length control anymore. */
   header p {
     margin: 0;
     opacity: 0.65;

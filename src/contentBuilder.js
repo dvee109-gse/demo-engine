@@ -13,6 +13,13 @@ export function buildKnowledgeContent(scrape, llmExtraction = null) {
 
   const services = scrape.services.length ? scrape.services : llmExtraction?.services || [];
   const description = llmExtraction?.summary || scrape.heroText;
+  // Short display-only subheading, distinct from `description` above — the
+  // full LLM summary is a paragraph meant for the AI's own knowledge, and
+  // showing it on the demo page under the -webkit-line-clamp:2 rule (see
+  // templates/demo-page.html) cut it off mid-sentence, which looked bad.
+  // Falls back to the fuller description when there's no LLM pass (rare —
+  // only when ANTHROPIC_API_KEY isn't set or extraction failed).
+  const tagline = llmExtraction?.tagline || description;
 
   const faqPairs = [...scrape.faqPairs, ...(llmExtraction?.faqPairs || [])];
 
@@ -55,7 +62,7 @@ export function buildKnowledgeContent(scrape, llmExtraction = null) {
       logoUrl: scrape.logoUrl || "",
       primaryColor: scrape.primaryColor || "#1a1a1a",
       phone: scrape.phone || "",
-      heroText: description || "",
+      heroText: tagline || "",
       sourceUrl: scrape.sourceUrl,
     },
   };

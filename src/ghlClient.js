@@ -114,6 +114,12 @@ export async function primeKnowledgeBase({ businessSummary, faqPairs }) {
 
 /** Updates the shared Conversation AI agent's business-context variables. */
 export async function primeAgent({ businessName, heroText }) {
+  // heroText is now a short display tagline (contentBuilder.js) that the
+  // schema explicitly asks the LLM to write with no trailing period — needs
+  // one added here before it's concatenated into a sentence, or it runs
+  // straight into "Answer only..." with no punctuation between them.
+  const heroSentence = heroText ? `${heroText.replace(/[.!?]+$/, "")}. ` : "";
+
   // Confirmed live (2026-08-08): PUT is a full replace, not a partial patch —
   // omitting personality/goal/instructions/mode 422s even when you only meant
   // to change name/instructions. Always resend the full config. `mode` enum
@@ -125,7 +131,7 @@ export async function primeAgent({ businessName, heroText }) {
       name: `${businessName} Demo Agent`,
       personality: "Friendly, knowledgeable, and professional — like a helpful front-desk employee.",
       goal: "Help prospective customers understand what this business offers and encourage them to book a consultation or ask further questions.",
-      instructions: `You represent ${businessName}. ${heroText || ""} Answer only using information from your knowledge base. Be concise and accurate — if you don't know something, say so honestly rather than guessing.`,
+      instructions: `You represent ${businessName}. ${heroSentence}Answer only using information from your knowledge base. Be concise and accurate — if you don't know something, say so honestly rather than guessing.`,
       mode: "auto-pilot",
       // Confirmed live (2026-08-16): omitting this on a PUT to the shared
       // demo bot (which is the location's only/primary agent) 422s with
