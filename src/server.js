@@ -125,10 +125,19 @@ function generateShortCode(length = 6) {
   return code;
 }
 
-/** Generates a short code for this contact and saves it, retrying on the
- * astronomically unlikely case of a collision (32^6 ≈ 1B possible codes —
- * this is just cheap insurance, not a real expected occurrence). */
+/** Generates a short code for this contact and saves it — or reuses the one
+ * it already has. Confirmed live (2026-08-28): re-running the pipeline for
+ * an already-demoed contact (e.g. regenerating their demo) always minted a
+ * BRAND NEW code, silently orphaning any link already sent to that prospect.
+ * Retries on the astronomically unlikely case of a collision when actually
+ * generating a new one (32^6 ≈ 1B possible codes — cheap insurance, not a
+ * real expected occurrence). */
 async function assignShortCode(contactId) {
+  const contact = await getContact(contactId);
+  const existingCode = findCustomFieldValue(contact, config.ghl.fieldIds.shortCode);
+  if (existingCode) {
+    return existingCode;
+  }
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateShortCode();
     const existing = await findContactByShortCode(code);
