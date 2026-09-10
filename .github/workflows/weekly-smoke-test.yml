@@ -1,0 +1,29 @@
+name: Weekly smoke test
+
+on:
+  schedule:
+    # Monday 9am America/New_York (EDT, UTC-4).
+    - cron: "0 13 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    # Scrape + LLM extraction + polling can take a few minutes — default
+    # 6h timeout is way too generous for something that should fail fast.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run smoketest
+        env:
+          DEMO_BASE_URL: ${{ secrets.DEMO_BASE_URL }}
+          GHL_PIT_TOKEN: ${{ secrets.GHL_PIT_TOKEN }}
+          GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+          GHL_API_BASE_URL: ${{ secrets.GHL_API_BASE_URL }}
+          GHL_API_VERSION: ${{ secrets.GHL_API_VERSION }}
+          GHL_FIELD_WEBSITE_URL_ID: ${{ secrets.GHL_FIELD_WEBSITE_URL_ID }}
+          GHL_FIELD_BUSINESS_NAME_ID: ${{ secrets.GHL_FIELD_BUSINESS_NAME_ID }}

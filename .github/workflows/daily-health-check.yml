@@ -1,0 +1,28 @@
+name: Daily health check
+
+on:
+  schedule:
+    # 9am America/New_York (EDT, UTC-4). Adjust by 1 hour around DST changes
+    # if it starts landing at the wrong local time.
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run healthcheck
+        env:
+          DEMO_BASE_URL: ${{ secrets.DEMO_BASE_URL }}
+          GHL_PIT_TOKEN: ${{ secrets.GHL_PIT_TOKEN }}
+          GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+          GHL_API_BASE_URL: ${{ secrets.GHL_API_BASE_URL }}
+          GHL_API_VERSION: ${{ secrets.GHL_API_VERSION }}
+          GHL_AGENT_ID: ${{ secrets.GHL_AGENT_ID }}
+          GHL_VOICE_AGENT_ID: ${{ secrets.GHL_VOICE_AGENT_ID }}
+          GHL_KNOWLEDGE_BASE_ID: ${{ secrets.GHL_KNOWLEDGE_BASE_ID }}

@@ -16,7 +16,9 @@
     "setup:agent": "node scripts/setupAgent.js",
     "setup:voice-prompt": "node scripts/setupVoiceAgentPrompt.js",
     "list:pipelines": "node scripts/listPipelines.js",
-    "seed:lead": "node scripts/seedTestLead.js"
+    "seed:lead": "node scripts/seedTestLead.js",
+    "healthcheck": "node scripts/healthCheck.js",
+    "smoketest": "node scripts/weeklySmokeTest.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",

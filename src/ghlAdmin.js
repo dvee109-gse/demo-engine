@@ -139,3 +139,11 @@ export async function createOpportunity({ pipelineId, stageId, contactId, name }
     },
   });
 }
+
+/** DELETE /contacts/{id} — cascades to the contact's opportunities/conversations
+ * per GHL's own UI warning (confirmed live via the Contacts UI delete-contact
+ * dialog, 2026-09-06). Used by scripts/weeklySmokeTest.js to clean up the test
+ * contact it creates each run. */
+export async function deleteContact(contactId) {
+  return ghlAdminRequest(`/contacts/${contactId}`, { method: "DELETE" });
+}
